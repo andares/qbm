@@ -1,0 +1,2 @@
+# qbm
+A qqbot manager
