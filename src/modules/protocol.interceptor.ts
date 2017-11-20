@@ -7,6 +7,9 @@ import 'rxjs/add/operator/map';
 export class ProtocolInterceptor implements NestInterceptor {
     intercept(dataOrRequest, context: ExecutionContext, stream$: Observable<any>): Observable<any> {
         return stream$.map(data => {
+            if (typeof data == 'string') {
+                return data;
+            }
             let res: Response = {
                 data: {
                     ok: 1,

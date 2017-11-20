@@ -1,4 +1,4 @@
-import { Controller, Get, Post, All, Req, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, All, Req, Res, HttpStatus } from '@nestjs/common';
 import { HttpException } from '@nestjs/core';
 import { QqbotService } from './qqbot.service';
 import { AddDto } from './dto/add.dto';
@@ -11,9 +11,21 @@ export class QqbotController {
 
     @All('check')
     async check( @Req() request): Promise<any> {
-        let res = this.qqbot.lists();
+        let raw: string = request.query.ports;
+        let ports = JSON.parse(raw);
+        let res = this.qqbot.lists(ports);
         return res;
     }
+
+    // @Get('code')
+    // async code( @Req() request): Promise<any> {
+    //     let { port } = request.query;
+    //     if (!port) {
+    //         throw new HttpException('Param port is lost', HttpStatus.BAD_REQUEST);
+    //     }
+    //     let res = this.qqbot.code(port);
+    //     return res;
+    // }
 
     @Get('start')
     async start( @Req() request): Promise<any> {
@@ -22,7 +34,17 @@ export class QqbotController {
             throw new HttpException('Param port is lost', HttpStatus.BAD_REQUEST);
         }
         let res = this.qqbot.start(port);
-        return [res, 22, request.query];
+        return res;
+    }
+
+    @Get('kill')
+    async kill( @Req() request): Promise<any> {
+        let { port } = request.query;
+        if (!port) {
+            throw new HttpException('Param port is lost', HttpStatus.BAD_REQUEST);
+        }
+        let res = this.qqbot.kill(port);
+        return res;
     }
 
     @Get('stop')
@@ -32,12 +54,22 @@ export class QqbotController {
             throw new HttpException('Param port is lost', HttpStatus.BAD_REQUEST);
         }
         let res = this.qqbot.stop(port);
-        return [res, 22, request.query];
+        return res;
     }
 
     @All('init')
     async init(): Promise<any> {
         let res = await this.qqbot.init();
         return res;
+    }
+
+    @All('code')
+    code( @Req() request, @Res() response) {
+        let { port } = request.query;
+        if (!port) {
+            throw new HttpException('Param port is lost', HttpStatus.BAD_REQUEST);
+        }
+        let res = this.qqbot.code(port);
+            response.end(res, "binary");
     }
 }

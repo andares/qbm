@@ -5,8 +5,8 @@ import { ProtocolInterceptor } from './modules/protocol.interceptor';
 
 async function bootstrap() {
     const app = await NestFactory.create(ApplicationModule);
-    app.use(bodyParser.json());
+    // app.use(bodyParser.json());
     app.useGlobalInterceptors(new ProtocolInterceptor());
-    await app.listen(3030);
+    await app.listen(9090);
 }
 bootstrap();

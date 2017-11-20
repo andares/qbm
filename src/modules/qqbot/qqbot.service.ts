@@ -1,6 +1,23 @@
 import { Component } from '@nestjs/common';
 import { spawnSync, execFileSync, execFile, execSync } from 'child_process';
-import { existsSync, writeFileSync, readFileSync, chmodSync, mkdirSync, unlinkSync } from 'fs';
+import {
+    existsSync,
+    writeFileSync,
+    readFileSync,
+    chmodSync,
+    mkdirSync,
+    unlinkSync,
+    readdirSync,
+} from 'fs';
+
+import { Buffer } from 'buffer';
+
+type BotInfo = {
+    port: string,
+    qq: string,
+    friends: number | any,
+    code: any,
+};
 
 @Component()
 export class QqbotService {
@@ -33,13 +50,74 @@ if __name__ == '__main__':
         qqbot:  "/usr/local/bin/qqbot",
     };
 
-    lists() {
-        return [1, 2, 3];
+    lists(ports: string[]) {
+        let res: any[] = [];
+        ports.map(port => {
+            let code = this.getLoginCode(port);
+            let info: BotInfo = {
+                port: port,
+                qq: this.getQq(port),
+                friends: this.getFriends(port),
+                code: code ? 1 : 0,
+            };
+            res.push(info);
+        });
+        return res;
+    }
+
+    code(port: string) {
+        return this.getLoginCode(port);
+    }
+
+    private getLoginCode(port: string): string {
+        let dir = this.getDir(port);
+        let img: string = "";
+        let filename = readdirSync(`${dir}`).find(file => /\.png$/.test(file));
+        if (!filename) {
+            return '';
+        }
+        return readFileSync(`${dir}/${filename}`, { encoding: "binary" });
+    }
+
+    private getFriends(port: string): number {
+        let result = this.callAndGetOutput(QqbotService.bin.qq, port, "list", "buddy");
+        if (result.startsWith("无法连接")) {
+            return -1;
+        }
+
+        return result.split("\n").length;
+    }
+
+    private getQq(port: string): string {
+        let dir = this.getDir(port);
+        let qq: string = "0";
+        readdirSync(`${dir}`).find(file => {
+            let result = /([0-9]+)\-contact\.db$/g.exec(file);
+            if (result == null) {
+                return false;
+            }
+            qq = result[1];
+            return true;
+        });
+        return qq;
+    }
+
+    kill(port: string) {
+        let output = this.callAndGetOutput("ps aux|grep", `qqbot_${port}`);
+        let res: string[] = [];
+        output.split("\n").map(line => {
+            let result = /^\S+\s+([0-9]+)/.exec(line);
+            if (result) {
+                this.callAndGetOutput("kill", "-9", result[1]);
+                res.push(`kill process ${result[1]}`);
+            }
+        });
+        return res;
     }
 
     stop(port: string) {
         let output = this.callAndGetOutput(QqbotService.bin.qq, port, "stop");
-        return output;
+        return output.split("\n");
     }
 
     start(port: string): Array<any> {
@@ -49,7 +127,7 @@ if __name__ == '__main__':
         let output = '';
         // console.log(`${QqbotService.bin.qqbot} -dm -b "${dir}" -p ${port} -hp ${hport}`);
         output = this.callAndGetOutput(QqbotService.bin.qqbot, "-dm", "-b", dir, "-p", port, "-hp", hport);
-        return [4, 5, 6, output];
+        return output.split("\n");
     }
 
     private getDir(port: string): string {
@@ -73,8 +151,9 @@ if __name__ == '__main__':
     }
 
     private cleanDir(dir: string) {
-        this.callAndGetOutput("rm", "-f", `${dir}/*.log`);
+        // this.callAndGetOutput("rm", "-f", `${dir}/*.log`);
         this.callAndGetOutput("rm", "-f", `${dir}/*.png`);
+        this.callAndGetOutput("rm", "-f", `${dir}/*.db`);
     }
 
     init(): string[] {
