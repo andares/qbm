@@ -1,7 +1,6 @@
 import { Controller, Get, Post, All, Req, Res, HttpStatus } from '@nestjs/common';
 import { HttpException } from '@nestjs/core';
 import { QqbotService } from './qqbot.service';
-import { AddDto } from './dto/add.dto';
 
 @Controller('qqbot')
 export class QqbotController {
