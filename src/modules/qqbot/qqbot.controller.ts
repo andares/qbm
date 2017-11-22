@@ -72,4 +72,14 @@ export class QqbotController {
         let res = this.qqbot.code(port);
             response.end(res, "binary");
     }
+
+    @Get('say')
+    async say( @Req() request): Promise<any> {
+        let { port, qq, content } = request.query;
+        if (!port) {
+            throw new HttpException('Param port is lost', HttpStatus.BAD_REQUEST);
+        }
+        let res = this.qqbot.say(qq, content, port);
+        return res;
+    }
 }
