@@ -142,6 +142,10 @@ if __name__ == '__main__':
         if (!existsSync(dir)) {
             this.callAndGetOutput("mkdir", "-p", dir);
         }
+        dir = `/tmp/qqbot_${port}/plugins`;
+        if (!existsSync(dir)) {
+            this.callAndGetOutput("mkdir", "-p", dir);
+        }
         return dir;
     }
 
