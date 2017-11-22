@@ -17,16 +17,6 @@ export class QqbotController {
         return res;
     }
 
-    // @Get('code')
-    // async code( @Req() request): Promise<any> {
-    //     let { port } = request.query;
-    //     if (!port) {
-    //         throw new HttpException('Param port is lost', HttpStatus.BAD_REQUEST);
-    //     }
-    //     let res = this.qqbot.code(port);
-    //     return res;
-    // }
-
     @Get('start')
     async start( @Req() request): Promise<any> {
         let { port } = request.query;
