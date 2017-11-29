@@ -32,8 +32,7 @@ def onQQMessage(bot, contact, member, content):
 
         # 处理短链接
         if parsed.hostname == "url.cn":
-            content = opener.open(content).info().getheader('Location')
-            parsed  = urlparse(content)
+            parsed  = urlparse(opener.open(content).info().getheader('Location'))
 
         query = parse_qs(parsed.query)
         if parsed.hostname == "gamecenter.qq.com"\
