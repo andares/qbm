@@ -4,6 +4,13 @@ from urlparse import urlparse
 from urlparse import parse_qs
 import re
 
+class NoRedirection(urllib2.HTTPErrorProcessor):
+  def http_response(self, request, response):
+    return response
+  https_response = http_response
+
+opener = urllib2.build_opener(NoRedirection)
+
 lion_domain = "api.shihoutv.com";
 
 def onQQMessage(bot, contact, member, content):
@@ -22,6 +29,12 @@ def onQQMessage(bot, contact, member, content):
         response = urllib2.urlopen(apiurl+"check-auth?qq="+contact.qq);
         bot.SendTo(contact, response.read())
     elif parsed.hostname is not None:
+
+        # 处理短链接
+        if parsed.hostname == "url.cn":
+            content = opener.open(content).info().getheader('Location')
+            parsed  = urlparse(content)
+
         query = parse_qs(parsed.query)
         if parsed.hostname == "gamecenter.qq.com"\
             and query.has_key('appid')\
