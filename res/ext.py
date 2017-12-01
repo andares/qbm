@@ -34,7 +34,7 @@ def onQQMessage(bot, contact, member, content):
         bot.SendTo(contact, response.read())
     elif match is not None:
         response = urllib2.urlopen(apiurl+"send-game-link?qq="+contact.qq+"&url="+match.group(1));
-        bot.SendTo(contact, response.read())
+        bot.SendTo(contact, response.read()+" "+match.group(1))
 
     # elif parsed.hostname is not None:
     #     # 处理短链接
